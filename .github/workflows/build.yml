@@ -22,6 +22,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      # Автоматично створюємо файл gradlew перед збіркою
+      - name: Generate Gradle Wrapper
+        run: gradle wrapper
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
