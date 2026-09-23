@@ -1,5 +1,6 @@
 package com.example.keriaapp // Вкажи свій package
 
+import android.content.Context
 import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,54 +15,40 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 // =======================================================
 // ⚙️ ТЕКСТИ ТА НАЛАШТУВАННЯ (ЗМІНЮЙ ТУТ)
 // =======================================================
-private const val MAIN_SCREEN_TITLE = "Система під загрозою!"
-private const val ERROR_WINDOW_TITLE = "Критична помилка Windows 98"
-private const val ERROR_TEXT = "Сталася неочікувана помилка! Зачиніть це вікно."
-private const val TOTAL_TIME_SECONDS = 90 // 1 хвилина 30 секунд (покаже як 1:30)
+private const val MAIN_SCREEN_TITLE = "керя лох"
+private const val ERROR_WINDOW_TITLE = "керя лох"
+private const val ERROR_TEXT = "керя лох."
+private const val TOTAL_TIME_SECONDS = 90 // 1 хвилина 30 секунд (відобразиться як 1:30)
+private const val MEOW_INTERVAL_MS = 2000L // Інтервал мявкання в мілісекундах (2 секунди)
 // =======================================================
 
 class MainActivity : ComponentActivity() {
-
-    private var mediaPlayer: MediaPlayer? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Запуск звуку meow.mp3 з папки res/raw/
-        try {
-            mediaPlayer = MediaPlayer.create(this, R.raw.meow)
-            mediaPlayer?.start()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
         setContent {
             RetroErrorApp()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mediaPlayer?.release()
-        mediaPlayer = null
     }
 }
 
 @Composable
 fun RetroErrorApp() {
+    val context = LocalContext.current
     var timeLeft by remember { mutableStateOf(TOTAL_TIME_SECONDS) }
     var showErrorDialog by remember { mutableStateOf(true) }
 
-    // Відлік часу
+    // Відлік часу (від 1:30 до 0:00)
     LaunchedEffect(Unit) {
         while (timeLeft > 0) {
             delay(1000L)
@@ -69,14 +56,22 @@ fun RetroErrorApp() {
         }
     }
 
-    // Формат часу 1:30
+    // Цикл для відтворення звуку meow.mp3 кожні 2 секунди
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            playMeowSound(context)
+            delay(MEOW_INTERVAL_MS) // Пауза 2 секунди
+        }
+    }
+
+    // Форматування часу 1:30
     val minutes = timeLeft / 60
     val seconds = timeLeft % 60
     val timeString = String.format("%d:%02d", minutes, seconds)
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF008080) // Бірюзовий фон як у класичному Windows
+        color = Color(0xFF008080) // Бірюзовий фон класичного Windows
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -93,7 +88,7 @@ fun RetroErrorApp() {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Таймер 1:30
+            // Дисплей таймера
             Text(
                 text = "Залишилось: $timeString",
                 color = Color.Yellow,
@@ -131,6 +126,19 @@ fun RetroErrorApp() {
     }
 }
 
+// Функція для запуску звуку нявкання
+private fun playMeowSound(context: Context) {
+    try {
+        val mediaPlayer = MediaPlayer.create(context, R.raw.meow)
+        mediaPlayer?.setOnCompletionListener { mp ->
+            mp.release() // Звільняємо пам'ять після завершення звуку
+        }
+        mediaPlayer?.start()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
 @Composable
 fun WindowsRetroDialog(
     title: String,
@@ -140,7 +148,7 @@ fun WindowsRetroDialog(
     Column(
         modifier = Modifier
             .width(310.dp)
-            .background(Color(0xFFC0C0C0)) // Сірий фон вікна Windows
+            .background(Color(0xFFC0C0C0)) // Сірий колір вікна Windows
             .border(2.dp, Color.White)
             .padding(4.dp)
     ) {
@@ -148,7 +156,7 @@ fun WindowsRetroDialog(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF000080)) // Темно-синій заголовок
+                .background(Color(0xFF000080)) // Синя смуга
                 .padding(horizontal = 6.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -161,7 +169,7 @@ fun WindowsRetroDialog(
                 fontFamily = FontFamily.Monospace
             )
 
-            // Хрестик закриття
+            // Кнопка закриття (Х)
             Button(
                 onClick = onClose,
                 contentPadding = PaddingValues(0.dp),
@@ -175,14 +183,13 @@ fun WindowsRetroDialog(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Контент помилки
+        // Текст та значок помилки
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Іконка помилки
             Box(
                 modifier = Modifier
                     .size(30.dp)
