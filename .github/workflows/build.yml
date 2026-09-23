@@ -19,7 +19,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Генерація Gradle Wrapper 8.7 напряму у корінні проєкту
       - name: Generate Gradle Wrapper
         run: |
           gradle wrapper --gradle-version 8.7 --distribution-type bin
@@ -28,8 +27,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # Явно вказуємо модуль :app для збірки
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Save APK Artifact
         uses: actions/upload-artifact@v4
