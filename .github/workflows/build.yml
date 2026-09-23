@@ -19,15 +19,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Генерація Gradle Wrapper 8.7 у тимчасовій папці без перевірки build.gradle
+      # Генерація Gradle Wrapper 8.7 напряму у корінні проєкту
       - name: Generate Gradle Wrapper
         run: |
-          mkdir temp_wrapper && cd temp_wrapper
-          gradle wrapper --gradle-version 8.7
-          cd ..
-          cp -r temp_wrapper/gradlew temp_wrapper/gradlew.bat temp_wrapper/gradle .
-          chmod +x gradlew
-          rm -rf temp_wrapper
+          gradle wrapper --gradle-version 8.7 --distribution-type bin
+          chmod +x ./gradlew
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
