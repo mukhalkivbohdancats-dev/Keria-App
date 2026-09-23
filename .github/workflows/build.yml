@@ -19,15 +19,21 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      # Автоматично створюємо файл gradlew перед збіркою
+      # Генерація Gradle Wrapper 8.7 у тимчасовій папці без перевірки build.gradle
       - name: Generate Gradle Wrapper
-        run: gradle wrapper
+        run: |
+          mkdir temp_wrapper && cd temp_wrapper
+          gradle wrapper --gradle-version 8.7
+          cd ..
+          cp -r temp_wrapper/gradlew temp_wrapper/gradlew.bat temp_wrapper/gradle .
+          chmod +x gradlew
+          rm -rf temp_wrapper
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Save APK Artifact
         uses: actions/upload-artifact@v4
